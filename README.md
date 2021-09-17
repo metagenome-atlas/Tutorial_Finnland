@@ -26,7 +26,7 @@ Time: 9:15 – 12:30 + 13:30 - 17:00 EEST
 
 Please note your progress in this [Progress table](https://docs.google.com/spreadsheets/d/1b8uat67SvAM-4B8sMc1NhaiGlBxT_L24cb3LmdYZm5c/edit), so that we can keep the overview.
 
-If you encounter any problems during the pre-work or the tutorial, fill in an [issue on the Tutorial repo](https://github.com/metagenome-atlas/Tutorial_Finnland/issues) So we are able to help you.
+If you encounter any problems during the pre-work or the tutorial, fill in an [issue on the Tutorial repo](https://github.com/metagenome-atlas/Tutorial_Finnland/issues) to tell us our problem. If you need help to login we will organize a meeting on Friday moring 24.9. To help you to do the steps. 
 
 ## To do list
 1. Check again the schedule and put it in your agenda. We send a calender invitation if this helps. Keep in mind that the course is organised in the Finnish timezone (GMT+3). 
