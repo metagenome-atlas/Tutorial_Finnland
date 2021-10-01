@@ -1,0 +1,458 @@
+---
+title: "Get started with metagenome-atlas"
+output:
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+```
+## Intro
+
+In the first part of the tutorial, you will learn how to get started with Atlas, init a new project and run it. Everything is done on the CSC server.
+
+
+
+*If you work on Windows don't open this webpage in Microsoft edge, it doesn't display all the interactive part correctly*
+
+### Environment
+
+We have some data in a shared environment. `/scratch/project_2004930`
+
+To make things easier we create a short-link.
+
+```{bash eval=F}
+ln -s  /scratch/project_2004930 ~/shared
+```
+Now you can directly access the shared data on `ls ~/shared`
+
+
+
+
+## Setup
+
+
+### Setup conda
+
+
+The only dependency for metagenome atlas is the *conda package manager*. It can easily be installed with the [Miniconda](https://repo.anaconda.com) package. And usually there is already a version of conda installed on the server.
+
+<!--
+Download [Miniconda](https://repo.anaconda.com) installation script and make it executable.
+```{bash, eval=FALSE}
+    wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+    chmod u+x Miniconda3-latest-Linux-x86_64.sh
+```
+
+Run the script
+```{bash, eval=FALSE}
+    ./Miniconda3-latest-Linux-x86_64.sh
+```
+
+Install miniconda in your home as suggested. Do as requested logout and login again.
+
+
+
+After that, you should see `(base)` at the left side of the terminal input line.
+
+
+
+To have access to all up-to-date bioinformatic packages you should add tell conda too look for them in the *conda-forge* and the *bioconda* channel in addition to the default.
+
+
+```{bash eval=F}
+conda config --add channels defaults
+conda config --add channels bioconda
+conda config --add channels conda-forge
+```
+
+These two channels are community-driven efforts to make many software packages installable as easy as possible.
+
+Let's `conda install mamba` and accept.
+
+**Now, you are ready to do bioinformatics!**
+
+
+#### Cleanup
+
+Remove the installation script. `rm Miniconda3-latest-Linux-x86_64.sh` -->
+
+
+For the tutorial activate our conda package manager.
+
+```{bash eval=F}
+./shared/miniconda3/bin/conda init
+```
+
+ --> Do as requested logout and login again.
+
+
+
+After that, you should see `(base)` at the left side of the terminal input line.
+
+The version of conda should already contain a version of atlas. Test it by typing `atlas --version`
+
+Now, you are ready to do bioinformatics!
+
+<!-- ### Conda environments
+
+Different programs need often different versions of python/R or other packages. It can become a nightmare to install different tools with conflicting dependencies. Conda allows you to encapsulate each software into its own *environment*.
+
+
+ Create a conda environment with your name, then activate it.
+```{bash eval=F}
+mamba create --yes -n name metagenome
+```
+
+We always use mamba except for activating or de-activiting environments.
+
+You should see a `(name)` at the beginning of the bash line.
+
+> You can run `conda deactivate` to go back to the base environment.
+ -->
+
+## (Optional) BBsketch
+
+
+**bbmap** is a suite of programs in java that do almost everything imaginable you can do with NGS sequences. It's also integrated in atlas.
+
+Install bbmap using `mamba install --yes bbmap`. The `--yes` tells mamba to install without asking. Use it wisely.
+
+In the bbmap suite there is a tool called. `sendsketch.sh` It can be used to quickly scan a sequencing file.
+
+Let's see what's in the ground water metagenome sample `S9_2` with.
+
+```{bash eval=F}
+    sendsketch.sh in=shared/Groundwater_metagenomes/S9_2/S9_2_FDSW202661739-1r_HNV72DSXY_L1_1.fq.gz in2=shared/Groundwater_metagenomes/S9_2/S9_2_FDSW202661739-1r_HNV72DSXY_L1_2.fq.gz protein reads=400k threads=4 -Xmx=500m
+```
+
+The tool predicts proteins in the first `400k` reads, compresses the protein information and compares them against a taxonomic server of all NCBI proteins. It returns a colored report. All quite fast. `threads=4 -Xmx=500m` tells the tool to use at maximum 500 Mb ram and 4 threads.
+
+
+```{r bbsketch, echo=FALSE}
+question("What is the most likely genus to be found in this sample?",
+  answer("Lactobacillus"),
+  answer("Janthinobacterium", correct = TRUE),
+  answer("Streptococcus")
+)
+```
+
+
+## Get started with Atlas
+<!--
+
+### Install atlas
+
+
+Now let's install metagenome-atlas.
+
+```{r setupa, echo=FALSE}
+question("What is the command to install metagenome-atlas",
+  answer("conda install metagenome-atlas",correct = TRUE, message="mamba is a faster alternative to conda, but both work."),
+  answer("mamba install metagenome-atlas", correct = TRUE),
+  answer("snakemake install metagenome-atlas")
+)
+```
+
+ Run the fastest command to install metagenome-atlas.
+
+
+-->
+
+
+
+### Start a new project
+
+Run `atlas --help`
+
+
+```{r init1, echo=FALSE}
+question("What is the subcommand that you will run to start a new project?",
+  answer("atlas download", message="All databases and software is installed on the fly. Download is optional."),
+  answer("atlas init",correct = TRUE, message = "Run the command with the '--help' to see what attributes you need"),
+  answer("atlas run")
+)
+```
+
+
+To start a new project you need the path to the fastq files of your metagenome samples (You analyze all samples together). We have provided you with two samples of test data in the folder `~/shared/test_reads`.
+
+The other parameter you should set is the database directory. This should point to a path where you can store the >100GB databases and software installed automatically by metagenome-atlas. Ideally, this is also a shared location with your colleges. For the Tutorial, we will simply use `~/shared/databases` folder which already exists.
+
+### Atlas init
+
+--> run the init command:
+
+```{bash, eval=FALSE}
+atlas init --working-dir ~/First_Run --db-dir ~/shared/databases ~/shared/test_reads
+```
+
+```{r init, echo=FALSE}
+question("What files did atlas create in the directory 'First_Run'?",
+  answer("test_reads"),
+  answer("databases",message="If you see a database folder you did something wrong"),
+  answer("config.yaml", correct = TRUE),
+  answer("atlas"),
+  answer("samples.tsv",correct = TRUE)
+)
+```
+
+
+
+## Configure
+
+### Samples & Resources
+
+--> Have a look at the `samples.tsv` with `cat samples.tsv`.
+Check if the names of the samples are inferred correctly. Samples should be alphanumeric names and cam be dash delimited. The `BinGroup` parameter can be used to activate co-binning. All samples in the same BinGroup are used mapped against each other. However, as it doesn't make sense to use this feature for less than three samples we don't use it and let the default.
+
+Let's check the `config.yaml` file. Open it in the integrated file browser on the jupyter page (The first page you entered after the login). It contains many parameters to configure the pipeline. They are explained in the comments or more in detail in the documentation.
+
+
+```{r config, echo=FALSE}
+message="The 'assembly_memory' uses up to 250GB"
+question("With the default configuration. How much memory would be used maximally? ",
+  answer("250 MB", message="Memory units are in GB"),
+  answer(" 60 GB",message= message),
+  answer("250 GB", correct=T),
+  answer(" 60 MB",message= message)
+)
+```
+
+You can also see that this amount of memory would be needed for 48h with 8 CPUs. When I meant that metagenomics is resource-intensive I was not joking. Luckily, most institutions have a high-performance computing system with allow you to run such calculations. Alternatively, atlas can also be run in the cloud.
+
+### Contamination filtering 
+
+If you scroll down to `contaminant_references`, you can already see that the Phix genome is added as a contaminant. The Phix is a virus that is frequently used as a control for sequencing. Even if you haven't used it in your sequencing there is some chance that some reads might swim around in the sequencer.
+
+Let's add a host genome that should be removed during the decontamination step.
+You should find a `human_genome.fasta` in your database folder.
+
+<!--
+First, find out the absolute path to the human genome, then add it to the config file in the section `contaminant_references`.
+-->
+
+Adapt the contaminant_references as follows:
+```
+contaminant_references:
+  PhiX: /path/to/databases/phiX174_virus.fa
+  human: /path/to/databases/human_genome.fasta
+```
+<!-- TODO: add human henome-->
+
+Don't just copy the snippet above you need to replace `/path/to/` with the correct absolute path. It's the same for both contaminant references.
+
+Pay attention that there are two spaces at the beginning of the line. Finally, save the file.
+
+## Run atlas
+
+### Dry Run
+
+Before Running the pipeline, which can take more than a day it is always recommended to do a dry-run. This simulates an execution and checks if there are any errors in the config file or elsewhere.
+
+--> Run `atlas run --help` to see how to do a dry-run.
+--> Call the run command with the dry-run option and `genomes` as workflow. Also specify the working directory. 
+
+**In case you missed the dry-run parameter the use `CTR+C` to stop the run.**
+
+The dry-run command takes a while and then it shows a list of all the steps that would be executed.
+
+```{r steps, echo=FALSE}
+question("How many steps would be executed by atlas?",
+  answer("4"),
+  answer("128", correct = TRUE, message="Remember the number."),
+  answer("174")
+)
+```
+
+
+This command runs all the steps in the atlas pipeline for two staples. You can see how it would scale for more samples.
+
+
+### Stop and go
+
+You might wonder what happens if the server crashes during the long execution of Atlas.
+
+
+–> run the command without the dry-run.
+
+Wait until one or two steps have finished then. –> press `CTR + C.`
+
+This simulates a system crash. The pipeline should stop and do some cleanup.
+
+Now run again the dry-run command. How many steps would now be executed by atlas?
+Do you see, that metagenome-atlas can continue to run the pipeline form the where it stopped? There are even checkpoints during the assembly from which it can continue.
+
+
+
+
+<!--
+
+If you run metagenome-atlas on your cluster (or cloud) you should set up a cluster profile, as described in the documentation. For the demo, I made a profile called `Demo`. On a cluster, each step can be automatically submitted to the cluster. In this case, you can run many jobs or steps in parallel. Even when you don't want to submit jobs to the cluster you can run metagenome-atlas on a server with high memory. In this case, atlas can also run many jobs in parallel. The Demo profile limits the memory usage so that one step is executed after the other.
+
+
+**Important: always run atlas with the `--profile Demo` parameters otherwise the Tutorial server can crash.**
+
+-->
+
+
+
+## Run atlas on the cluter
+### Single node execution
+
+Usually you are not allowed to run a large workflow on the login node of a cluster. 
+Jobs are submitted to the cluster via a cluster submission script. Usually something like:
+
+```
+#!/bin/env bash
+#SBATCH --job-name=test
+#SBATCH --account=project_2004930
+#SBATCH --output=%j.txt
+#SBATCH --error=%j.txt
+#SBATCH --partition=longrun
+#SBATCH --time=3-00:00:00
+#SBATCH --mem=10gb
+#SBATCH --ntasks=2
+#SBATCH --nodes=1
+
+
+srun mycomand.sh param1 param2
+
+```
+
+
+### Cluster wrapper for atlas
+
+It is possible to run atlas on a single cluster machine, with enough memory and threads. However, it is much more efficient to submit each job with a separate script. Each job will be run in parallel with the optimal memory and threads.
+It would be a lot of work to submit all the jobs of the pipeline on your own.
+Luckily, Atlas has the ability to write, submit and check the status of the job-scripts for you. The only thing you need to, is to install the [atlas cluster wrapper](https://github.com/metagenome-atlas/clusterprofile) and to tell him a bit more about our cluster system.
+
+
+
+Run the following commands to set up the wrapper.
+
+```{bash,eval=F}
+mkdir -p ~/.config/snakemake
+cd ~/.config/snakemake
+cookiecutter https://github.com/metagenome-atlas/clusterprofile.git
+```
+Keep the default parameters.
+
+Now let's adapt the cluter profile a bit to our needs.
+
+For billing reasons we need to specify which account we are using. Open the file `nano cluster_config.yaml`. Add the account line with 2 spaces at the beginning.
+
+```
+__default__:
+  account: project_2004930
+```
+Save and close nano.
+
+### Queues
+
+On a cluster systems there are different partitions or queues. For example, a job that uses a large amount of memory needs to wait for servers with large memory, where as small jobs should go to a different queue to be run faster.
+
+
+We need to tell the cluster wrapper which partitions are available on the system. For this rename the file `mv queues.tsv.example queues.tsv`.
+
+Check out the table. `cat queues.tsv`. I made the table based on the [specifications of the CSC](https://docs.csc.fi/computing/running/batch-job-partitions/). On your system you would need to enter the values of your system.
+
+```{r dry, echo=FALSE}
+question("Which is the queue where most jobs will go that have low resource requirements?",
+  answer("small", correct=TRUE),
+  answer("large"),
+  answer("hugemem")
+)
+```
+
+Modify the queue table so that more jobs go to the large queue. So only jobs that need low memory go to the small queue.
+
+Set `mem_mb` of the `small` partition to 50'000
+Set `mem_mb` of the `large` partition to 280'000
+
+
+
+### Run atlas with the cluster wrapper
+
+Go to the atlas working directory `cd ~/First_Run`.
+
+In order to let atlas continue running even if you disconnect open a **screen**:
+
+```{bash eval=F}
+screen -S first_run
+```
+
+ater some seconds you should be at the same place.
+
+
+--> Run atlas with the cluster wrapper and the `assembly` workflow.
+
+```{bash eval=F}
+atlas run assembly --profile cluster
+```
+Does it work as expected? Look for outputs of the wrapper with `CLUSTER`.
+
+
+### Deatach from the screen.
+
+Click `Ctrl-a Ctrl-d`  you should be back to an empty terminal.
+
+To re-atach to the screen run 
+
+`screen -r first`
+
+And you should be back where atlas is running. 
+
+## Output 
+### Reports
+
+While the pipeline is running you can already answer the flowing questions?
+
+The output of the qc, and the assembly sub-workflow are summarized in two reports.
+
+The `reports/QC_report.html` gives a graphical report on the most important numbers.
+
+
+The dataset used for the Tutorial is a very small one, here you can see the [QC report](https://metagenome-atlas.readthedocs.io/en/latest/_static/QC_report.html) of a bigger run.
+
+
+```{r qcreport2, echo=FALSE}
+message= "Sample F26 has lost many reads during the quality filtering, maybe it would make sense to drop it altogether."
+question("In the bigger run, are all samples of good quality? ",
+  answer("yes", message=message),
+  answer("no",message=message, correct = TRUE)
+)
+```
+
+
+### Assembly report
+
+Once the assembly sub-workflow is finished, it will again produce a report `reports/assembly_report.html`. 
+
+--> Copy it to your computer and open it with a webbrowser
+
+#### Option MobaXterm. 
+
+Click on the left site to open the file with a web browser
+
+#### Option ssh
+
+In a new terminal on your computer enter:
+
+```
+scp student???@puhti.csc.fi:/users/student???/First_Run/reports/assembly_report.html .
+```
+
+#### Option cyberduck
+
+[Cyberduck](https://cyberduck.io/) is a software that helps you to copy files from a server to another. 
+
+
+
+### End
+
+Deatach from the screen and take a break.
+
